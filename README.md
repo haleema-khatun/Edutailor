@@ -33,36 +33,6 @@ It combines dynamic content, AI-assisted tools, and responsive design to provide
 
 ---
 
-
-## 🛠️ Tech Stack
-| Frontend | Backend | Tools & Version Control |
-|----------|---------|------------------------|
-| HTML, CSS, JavaScript | Python | Git & GitHub |
-
----
-
-## 📂 Project Structure
-
-Edutailor/
-│
-├─ .vscode/ # Editor settings
-├─ claude code/ # AI-generated snippets
-├─ gitleaks.zip # Security scanning tools
-├─ index.html # Main frontend file
-├─ README.md # Project overview
-├─ .gitignore # Git ignore rules
-└─ other project files
-
-
----
-
-## ⚡ Live Demo
-🔗 [View Edutailor Live](https://haleema-khatun.github.io/Edutailor/)  
-
----
-
-
-
 - **Frontend:** React SPA, communicates with backend via REST API.  
 - **Backend:** Flask application exposing endpoints with validations and structured responses.  
 - **Database:** Relational schema to ensure consistency, relational constraints, and simple CRUD operations.  
@@ -114,6 +84,28 @@ Edutailor/
 
 ---
 
+ ## Edutailor Project Architecture
+Frontend (React)
+├─ Components
+├─ Pages
+├─ Services (API calls)
+├─ State Management (hooks/context)
+Backend (Flask)
+├─ app.py (Flask app)
+├─ routes/ (API endpoints)
+├─ models/ (DB models)
+├─ services/ (business logic)
+├─ utils/ (helpers, validations)
+Database (Relational)
+├─ Tables with relationships
+├─ Constraints (PK, FK, Not Null)
+├─ Seed & migration scripts
+AI Guidance Files
+├─ claude.md
+├─ agents.md
+├─ prompting_rules.md
+├─ coding_standards.md
+
 ## 📝 Setup & Running
 
 ### Backend
@@ -159,4 +151,3 @@ Haleema Khatun – GitHub Profile
 This project is licensed under the MIT License – see LICENSE
  for details.
 
-<p align="center">✨ *Edutailor – Tailoring education, one interactive module at a time!* 🎓</p> ```
