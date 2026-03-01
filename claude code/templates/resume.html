@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="fade-in">
+    <h2 class="section-title"><i class="fas fa-file-alt text-gradient"></i> Resume ATS Checker</h2>
+    <p class="section-subtitle">Upload your resume and see how it scores against Applicant Tracking Systems</p>
+
+    <div class="glass-card-static p-4 mb-4">
+        <form method="post" enctype="multipart/form-data" id="resumeForm">
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('resumeInput').click();">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.3rem;">
+                    Drop your resume here or click to browse
+                </p>
+                <p style="color: var(--text-muted); font-size: 0.85rem;" id="fileName">
+                    Supports PDF, DOCX, and TXT files
+                </p>
+                <input type="file" name="resume" id="resumeInput" class="d-none" required accept=".pdf,.docx,.txt"
+                    onchange="document.getElementById('fileName').textContent = this.files[0].name;">
+            </div>
+            <div class="text-center mt-3">
+                <button class="btn-gradient" type="submit"><i class="fas fa-search"></i> Check ATS Score</button>
+            </div>
+        </form>
+    </div>
+
+    {% if result %}
+    <div class="glass-card-static p-4 fade-in">
+
+        <!-- Score Display -->
+        <div class="ats-score-display">
+            <div class="ats-score-circle"
+                style="color: {% if result['ATS Score'] >= 75 %}var(--accent-green){% elif result['ATS Score'] >= 50 %}var(--accent-orange){% else %}#ef4444{% endif %};">
+                {{ result["ATS Score"] }}%
+            </div>
+            <p style="font-weight: 700; font-size: 1.1rem;">
+                {% if result["ATS Score"] >= 75 %}
+                <span style="color: var(--accent-green);">Excellent! Your resume is ATS-ready</span>
+                {% elif result["ATS Score"] >= 50 %}
+                <span style="color: var(--accent-orange);">Good, but needs improvement</span>
+                {% else %}
+                <span style="color: #ef4444;">Needs significant improvement</span>
+                {% endif %}
+            </p>
+        </div>
+
+        <hr style="border-color: var(--glass-border);">
+
+        <div class="row g-4 mt-2">
+            <!-- Matched Keywords -->
+            <div class="col-md-6">
+                <h5 style="font-weight: 700; margin-bottom: 1rem;">
+                    <i class="fas fa-check-circle" style="color: var(--accent-green);"></i> Matched Keywords
+                </h5>
+                <div>
+                    {% for item in result["Matched Keywords"] %}
+                    <span class="keyword-tag keyword-matched"><i class="fas fa-check"></i> {{ item }}</span>
+                    {% endfor %}
+                    {% if not result["Matched Keywords"] %}
+                    <p style="color: var(--text-muted); font-size: 0.88rem;">No keywords matched</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Missing Keywords -->
+            <div class="col-md-6">
+                <h5 style="font-weight: 700; margin-bottom: 1rem;">
+                    <i class="fas fa-times-circle" style="color: #ef4444;"></i> Missing Keywords
+                </h5>
+                <div>
+                    {% for item in result["Missing Keywords"] %}
+                    <span class="keyword-tag keyword-missing"><i class="fas fa-times"></i> {{ item }}</span>
+                    {% endfor %}
+                    {% if not result["Missing Keywords"] %}
+                    <p style="color: var(--accent-green); font-size: 0.88rem;">All keywords present!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Improvements -->
+        {% if result["Improvements"] %}
+        <div class="mt-4">
+            <h5 style="font-weight: 700; margin-bottom: 1rem;">
+                <i class="fas fa-lightbulb" style="color: var(--accent-orange);"></i> Improvement Suggestions
+            </h5>
+            {% for tip in result["Improvements"] %}
+            <div class="glass-card p-3 mb-2" style="border-left: 3px solid var(--accent-orange);">
+                <i class="fas fa-arrow-right" style="color: var(--accent-orange); margin-right: 8px;"></i>
+                {{ tip }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

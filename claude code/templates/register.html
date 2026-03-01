@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="auth-wrapper">
+    <div class="glass-card auth-card fade-in">
+        <div class="text-center mb-4">
+            <h3><i class="fas fa-user-plus text-gradient"></i> Create Account</h3>
+            <p class="auth-subtitle">Join thousands of students building their careers with AI</p>
+        </div>
+
+        <form method="post" id="registerForm">
+            <div class="mb-3">
+                <label class="form-label-custom">Username</label>
+                <input name="username" class="form-control form-control-glass" placeholder="Choose a username" required
+                    minlength="3" autocomplete="username">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label-custom">Email</label>
+                <input name="email" type="email" class="form-control form-control-glass" placeholder="Enter your email"
+                    required autocomplete="email">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label-custom">Password</label>
+                <input name="password" type="password" id="password" class="form-control form-control-glass"
+                    placeholder="Create a password (min 6 chars)" required minlength="6" autocomplete="new-password">
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label-custom">Confirm Password</label>
+                <input name="confirm_password" type="password" id="confirm_password"
+                    class="form-control form-control-glass" placeholder="Confirm your password" required
+                    autocomplete="new-password">
+            </div>
+
+            <div id="passwordError" class="flash-message flash-error" style="display:none;">
+                <i class="fas fa-exclamation-circle"></i> Passwords do not match!
+            </div>
+
+            <button class="btn-gradient w-100 mb-3" type="submit">
+                <i class="fas fa-rocket"></i> Create Account
+            </button>
+        </form>
+
+        <p class="text-center mb-0" style="font-size: 0.9rem; color: var(--text-secondary);">
+            Already have an account? <a href="/login" class="auth-link">Sign in</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+        const pw = document.getElementById('password').value;
+        const cpw = document.getElementById('confirm_password').value;
+
+        if (pw !== cpw) {
+            e.preventDefault();
+            document.getElementById('passwordError').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('passwordError').style.display = 'none';
+            }, 3000);
+        }
+    });
+</script>
+
+{% endblock %}

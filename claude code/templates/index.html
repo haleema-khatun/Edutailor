@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Hero Section -->
+<div class="hero-section fade-in">
+    <h1 class="hero-title">
+        Precision Learning for<br>
+        <span class="hero-gradient-text">Every Student</span>
+    </h1>
+    <p class="hero-subtitle">
+        Analyze your strengths, master weak areas, and test your knowledge with smart quizzes — all guided by AI that
+        adapts to your unique learning path.
+    </p>
+    <div class="hero-buttons">
+        <a href="/login" class="btn-gradient"><i class="fas fa-sign-in-alt"></i> Get Started</a>
+        <a href="/register" class="btn-outline-glass"><i class="fas fa-user-plus"></i> Create Account</a>
+    </div>
+</div>
+
+<!-- Features Grid -->
+<div class="features-grid fade-in">
+    <div class="glass-card feature-card">
+        <div class="feature-icon purple"><i class="fas fa-brain"></i></div>
+        <h5>Smart Learning</h5>
+        <p>Analyze 12+ subjects and get personalized improvement plans with curated resources.</p>
+    </div>
+
+    <div class="glass-card feature-card">
+        <div class="feature-icon cyan"><i class="fas fa-robot"></i></div>
+        <h5>AI Mock Interview</h5>
+        <p>Practice with an AI interviewer that evaluates your answers in real-time with voice support.</p>
+    </div>
+
+    <div class="glass-card feature-card">
+        <div class="feature-icon pink"><i class="fas fa-file-alt"></i></div>
+        <h5>Resume ATS Checker</h5>
+        <p>Score your resume against industry standards and get actionable improvement tips.</p>
+    </div>
+
+    <div class="glass-card feature-card">
+        <div class="feature-icon green"><i class="fas fa-chart-line"></i></div>
+        <h5>Real-time Analytics</h5>
+        <p>Track your progress across all modules with beautiful charts and performance insights.</p>
+    </div>
+</div>
+
+{% endblock %}

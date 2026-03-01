@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="fade-in">
+    <h2 class="section-title"><i class="fas fa-book-open text-gradient"></i> Skill Analyzer</h2>
+    <p class="section-subtitle">Rate your proficiency (0-100) in each subject. We'll identify weaknesses and build your
+        improvement plan.</p>
+
+    <form method="post" id="learningForm">
+        <!-- Programming Languages -->
+        <div class="subject-category">
+            <div class="category-title"><i class="fas fa-code" style="color: var(--accent-purple);"></i> Programming
+                Languages</div>
+            <div class="subject-grid">
+                {% for subject in ["Python", "Java", "JavaScript", "C++"] %}
+                <div class="glass-card subject-card">
+                    <h6>{{ subject }}</h6>
+                    <input type="range" name="{{ subject }}" class="score-slider" min="0" max="100" value="50"
+                        oninput="this.nextElementSibling.textContent = this.value + '%'" id="slider_{{ subject }}">
+                    <span class="score-display">50%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- AI / ML -->
+        <div class="subject-category">
+            <div class="category-title"><i class="fas fa-brain" style="color: var(--accent-cyan);"></i> AI & Machine
+                Learning</div>
+            <div class="subject-grid">
+                {% for subject in ["Machine Learning", "Deep Learning", "NLP"] %}
+                <div class="glass-card subject-card">
+                    <h6>{{ subject }}</h6>
+                    <input type="range" name="{{ subject }}" class="score-slider" min="0" max="100" value="50"
+                        oninput="this.nextElementSibling.textContent = this.value + '%'">
+                    <span class="score-display">50%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- CS Fundamentals -->
+        <div class="subject-category">
+            <div class="category-title"><i class="fas fa-microchip" style="color: var(--accent-pink);"></i> CS
+                Fundamentals</div>
+            <div class="subject-grid">
+                {% for subject in ["DSA", "DBMS", "Operating Systems"] %}
+                <div class="glass-card subject-card">
+                    <h6>{{ subject }}</h6>
+                    <input type="range" name="{{ subject }}" class="score-slider" min="0" max="100" value="50"
+                        oninput="this.nextElementSibling.textContent = this.value + '%'">
+                    <span class="score-display">50%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Web & Tools -->
+        <div class="subject-category">
+            <div class="category-title"><i class="fas fa-globe" style="color: var(--accent-green);"></i> Web & Tools
+            </div>
+            <div class="subject-grid">
+                {% for subject in ["Web Development", "Git & DevOps"] %}
+                <div class="glass-card subject-card">
+                    <h6>{{ subject }}</h6>
+                    <input type="range" name="{{ subject }}" class="score-slider" min="0" max="100" value="50"
+                        oninput="this.nextElementSibling.textContent = this.value + '%'">
+                    <span class="score-display">50%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button class="btn-gradient" type="submit"><i class="fas fa-search-plus"></i> Analyze My Skills</button>
+        </div>
+    </form>
+
+    <!-- Results -->
+    {% if weak_subjects %}
+    <div class="mt-5">
+        <h3 class="section-title"><i class="fas fa-exclamation-triangle" style="color: var(--accent-orange);"></i>
+            Improvement Plan</h3>
+        <p class="section-subtitle">Subjects scoring below 60% need improvement. Here's your personalized roadmap.</p>
+
+        {% for subject, details in weak_subjects.items() %}
+        <div class="glass-card weakness-card fade-in" style="animation-delay: {{ loop.index * 0.1 }}s;">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <h5 class="mb-0">{{ subject }}</h5>
+                <span class="score-badge score-low">
+                    <i class="fas fa-arrow-down"></i> {{ details.level }}
+                </span>
+            </div>
+
+            <div class="progress-bar-custom mb-3">
+                <div class="progress-fill"
+                    style="width: {{ details.score }}%; background: linear-gradient(135deg, #ef4444, #f59e0b);"></div>
+            </div>
+
+            <p style="font-size: 0.88rem; color: var(--text-secondary);">
+                <i class="fas fa-clock" style="color: var(--accent-orange);"></i>
+                <strong>Timeline:</strong> {{ details.timeline }}
+            </p>
+
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                <i class="fas fa-link" style="color: var(--accent-cyan);"></i>
+                <strong>Resources:</strong>
+            </p>
+
+            {% for link in details.resources %}
+            <a href="{{ link }}" target="_blank" class="resource-link">
+                <i class="fas fa-external-link-alt"></i> {{ link }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

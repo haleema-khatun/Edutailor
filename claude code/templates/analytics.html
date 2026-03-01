@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="fade-in">
+    <h2 class="section-title"><i class="fas fa-chart-line text-gradient"></i> Progress Analytics</h2>
+    <p class="section-subtitle">Your real-time performance across all career modules</p>
+
+    <!-- Summary Cards -->
+    <div class="analytics-header">
+        <div class="glass-card stat-card">
+            <div class="stat-value">{{ summary.total_assessments }}</div>
+            <div class="stat-label">Total Assessments</div>
+        </div>
+        <div class="glass-card stat-card">
+            <div class="stat-value">{{ summary.avg_score }}%</div>
+            <div class="stat-label">Average Score</div>
+        </div>
+        <div class="glass-card stat-card">
+            <div class="stat-value">{{ summary.best_subject.subject[:10] if summary.best_subject else '—' }}</div>
+            <div class="stat-label">Best Subject</div>
+        </div>
+        <div class="glass-card stat-card">
+            <div class="stat-value">{{ summary.category_averages | length }}</div>
+            <div class="stat-label">Active Categories</div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Skills Bar Chart -->
+        <div class="col-lg-7">
+            <div class="glass-card-static chart-card">
+                <h5><i class="fas fa-signal" style="color: var(--accent-purple);"></i> Subject Scores</h5>
+                <canvas id="skillChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Category Doughnut -->
+        <div class="col-lg-5">
+            <div class="glass-card-static chart-card">
+                <h5><i class="fas fa-chart-pie" style="color: var(--accent-cyan);"></i> Category Performance</h5>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Bars -->
+    {% if summary.subject_scores %}
+    <div class="glass-card-static chart-card">
+        <h5><i class="fas fa-tasks" style="color: var(--accent-green);"></i> Subject Progress</h5>
+        {% for subject, score in summary.subject_scores.items() %}
+        <div class="mb-3">
+            <div class="progress-label">
+                <span>{{ subject }}</span>
+                <span>{{ score }}%</span>
+            </div>
+            <div class="progress-bar-custom">
+                <div class="progress-fill" style="width: {{ score }}%;
+                    {% if score >= 70 %}background: var(--gradient-cool);
+                    {% elif score >= 40 %}background: linear-gradient(135deg, #f59e0b, #fbbf24);
+                    {% else %}background: linear-gradient(135deg, #ef4444, #f97316);
+                    {% endif %}
+                "></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Recent Activity -->
+    {% if summary.recent %}
+    <div class="glass-card-static chart-card">
+        <h5><i class="fas fa-history" style="color: var(--accent-orange);"></i> Recent Activity</h5>
+        <div class="table-responsive">
+            <table class="table table-borderless" style="color: var(--text-primary);">
+                <thead>
+                    <tr
+                        style="color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px;">
+                        <th>Subject</th>
+                        <th>Score</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in summary.recent %}
+                    <tr style="border-bottom: 1px solid var(--glass-border);">
+                        <td>{{ item.subject }}</td>
+                        <td>
+                            <span
+                                class="score-badge {% if item.score >= 70 %}score-high{% elif item.score >= 40 %}score-medium{% else %}score-low{% endif %}">
+                                {{ item.score }}%
+                            </span>
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 0.85rem;">{{ item.timestamp[:16] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Download Report -->
+    <div class="text-center mt-3 mb-4">
+        <a href="/download" class="btn-gradient"><i class="fas fa-download"></i> Download PDF Report</a>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    // Subject scores chart
+    const subjectScores = {{ summary.subject_scores | tojson }};
+    const labels = Object.keys(subjectScores);
+    const data = Object.values(subjectScores);
+
+    if (labels.length > 0) {
+        new Chart(document.getElementById('skillChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Score',
+                    data: data,
+                    backgroundColor: data.map((v, i) => {
+                        const colors = ['rgba(124,58,237,0.6)', 'rgba(6,182,212,0.6)', 'rgba(236,72,153,0.6)',
+                            'rgba(16,185,129,0.6)', 'rgba(245,158,11,0.6)', 'rgba(99,102,241,0.6)',
+                            'rgba(244,63,94,0.6)', 'rgba(34,211,238,0.6)', 'rgba(168,85,247,0.6)',
+                            'rgba(52,211,153,0.6)', 'rgba(251,146,60,0.6)', 'rgba(129,140,248,0.6)'];
+                        return colors[i % colors.length];
+                    }),
+                    borderRadius: 8,
+                    borderWidth: 0,
+                    barThickness: 30
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.04)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // Category doughnut
+    const catAvg = {{ summary.category_averages | tojson }};
+    const catLabels = Object.keys(catAvg);
+    const catData = Object.values(catAvg);
+
+    if (catLabels.length > 0) {
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: catLabels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+                datasets: [{
+                    data: catData,
+                    backgroundColor: ['rgba(124,58,237,0.7)', 'rgba(6,182,212,0.7)', 'rgba(236,72,153,0.7)'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '65%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true } }
+                }
+            }
+        });
+    }
+</script>
+
+{% endblock %}
