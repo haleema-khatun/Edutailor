@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/your-username/your-banner-image.png" alt="Edutailor Banner" width="100%">
-</p>
 
 <h1 align="center">🌟 Edutailor</h1>
 
