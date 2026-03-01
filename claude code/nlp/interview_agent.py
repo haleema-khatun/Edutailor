@@ -3,7 +3,7 @@ import random
 import os
 
 # Secure way: use environment variable
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="YOUR_API_KEY") # Replace with your actual API key or set it as an environment variable for security.
 
 # Backup local questions if API fails
 FALLBACK_QUESTIONS = [
