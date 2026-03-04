@@ -1,9 +1,11 @@
 from openai import OpenAI
 import random
 import os
+import re
+from textblob import TextBlob
 
-# Secure way: use environment variable
-client = OpenAI(api_key="YOUR_API_KEY") # Replace with your actual API key or set it as an environment variable for security.
+# Use API key
+client = OpenAI(api_key="YOUR_OPENAI_API_KEY")  # Replace with your actual API key or set it as an environment variable
 
 # Backup local questions if API fails
 FALLBACK_QUESTIONS = [
@@ -19,7 +21,6 @@ FALLBACK_QUESTIONS = [
 
 
 def generate_question(chat_history):
-
     try:
         messages = [
             {
@@ -54,10 +55,8 @@ Be realistic and professional."""
         return response.choices[0].message.content
 
     except Exception as e:
-
         # fallback if API fails
         asked = [msg["content"] for msg in chat_history if msg["role"] == "interviewer"]
-
         remaining = [q for q in FALLBACK_QUESTIONS if q not in asked]
 
         if remaining:
@@ -65,11 +64,62 @@ Be realistic and professional."""
         else:
             return "Interview completed. Good job!"
 
-import re
-from textblob import TextBlob
 
 def analyze_answer(answer):
+    """Analyze an interview answer using OpenAI for real, contextual feedback."""
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are an expert interview coach. Analyze the candidate's answer and provide:
+1. A score from 0-100
+2. A confidence rating from 0-100
+3. Specific, actionable feedback points (2-4 bullet points)
 
+Evaluate based on:
+- Clarity and structure of the answer
+- Use of specific examples and technical details
+- Confidence and professionalism
+- Relevance and completeness
+
+Respond in this exact JSON format (no markdown, just raw JSON):
+{"score": 75, "confidence": 80, "feedback": ["Point 1", "Point 2", "Point 3"]}"""
+                },
+                {
+                    "role": "user",
+                    "content": f"Analyze this interview answer:\n\n{answer}"
+                }
+            ],
+            temperature=0.3
+        )
+
+        import json
+        result_text = response.choices[0].message.content.strip()
+        # Clean up any markdown formatting
+        if result_text.startswith("```"):
+            result_text = result_text.split("\n", 1)[1]
+            result_text = result_text.rsplit("```", 1)[0]
+        result = json.loads(result_text)
+
+        # Compute sentiment locally as a supplementary metric
+        sentiment = TextBlob(answer).sentiment.polarity
+
+        return {
+            "score": min(max(result.get("score", 50), 0), 100),
+            "confidence": min(max(result.get("confidence", 50), 0), 100),
+            "sentiment": sentiment,
+            "feedback": result.get("feedback", ["Good attempt. Keep practicing!"])
+        }
+
+    except Exception as e:
+        # Fallback to local analysis if API fails
+        return _local_analyze_answer(answer)
+
+
+def _local_analyze_answer(answer):
+    """Fallback local analysis if OpenAI API is unavailable."""
     score = 0
     feedback = []
 
@@ -81,13 +131,13 @@ def analyze_answer(answer):
     elif word_count > 40:
         score += 20
     else:
-        feedback.append("Answer is too short. Add more details.")
+        feedback.append("Answer is too short. Add more details and examples.")
 
     # Confidence words
     confident_words = [
         "implemented", "developed", "built",
         "created", "designed", "improved",
-        "optimized", "achieved"
+        "optimized", "achieved", "led", "managed"
     ]
 
     confidence_score = sum(
@@ -97,7 +147,7 @@ def analyze_answer(answer):
     score += min(confidence_score * 5, 30)
 
     if confidence_score < 2:
-        feedback.append("Use more confident action words like 'developed', 'implemented'.")
+        feedback.append("Use more confident action words like 'developed', 'implemented', 'led'.")
 
     # Sentiment analysis
     sentiment = TextBlob(answer).sentiment.polarity
@@ -110,7 +160,8 @@ def analyze_answer(answer):
     # Technical keywords
     tech_keywords = [
         "python", "project", "machine learning",
-        "api", "database", "flask", "sql"
+        "api", "database", "flask", "sql", "algorithm",
+        "architecture", "framework"
     ]
 
     tech_score = sum(

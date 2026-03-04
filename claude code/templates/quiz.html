@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="fade-in">
+    <h2 class="section-title"><i class="fas fa-question-circle text-gradient"></i> Knowledge Quiz</h2>
+    <p class="section-subtitle">Test your knowledge in any subject. 10 questions per quiz — see how well you've learned!
+    </p>
+
+    {% if not selected_subject and not show_results %}
+    <!-- Subject Selection -->
+    <div class="subject-category">
+        <div class="category-title"><i class="fas fa-list" style="color: var(--accent-purple);"></i> Choose a Subject
+        </div>
+        <div class="quiz-subject-grid">
+            {% for subject in subjects %}
+            <a href="/quiz?subject={{ subject | urlencode }}" class="glass-card quiz-subject-card">
+                <div class="quiz-subject-icon">
+                    {% if subject in ["Python", "Java", "JavaScript", "C++"] %}
+                    <i class="fas fa-code" style="color: var(--accent-purple);"></i>
+                    {% elif subject in ["Machine Learning", "Deep Learning", "NLP"] %}
+                    <i class="fas fa-brain" style="color: var(--accent-cyan);"></i>
+                    {% elif subject in ["DSA", "DBMS", "Operating Systems"] %}
+                    <i class="fas fa-microchip" style="color: var(--accent-pink);"></i>
+                    {% else %}
+                    <i class="fas fa-globe" style="color: var(--accent-green);"></i>
+                    {% endif %}
+                </div>
+                <h6>{{ subject }}</h6>
+                <span class="quiz-badge">10 Questions</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% elif questions and not show_results %}
+    <!-- Quiz Questions -->
+    <div class="glass-card quiz-active-card">
+        <div class="quiz-header">
+            <h4><i class="fas fa-pencil-alt" style="color: var(--accent-cyan);"></i> {{ selected_subject }} Quiz</h4>
+            <span class="quiz-badge quiz-badge-lg">10 Questions</span>
+        </div>
+
+        <form method="post" action="/quiz" id="quizForm">
+            <input type="hidden" name="subject" value="{{ selected_subject }}">
+
+            {% for q in questions %}
+            {% set q_idx = loop.index0 %}
+            <div class="quiz-question-card fade-in" style="animation-delay: {{ loop.index * 0.1 }}s;">
+                <div class="question-number">Q{{ loop.index }}</div>
+                <p class="question-text">{{ q.q }}</p>
+                <div class="quiz-options">
+                    {% for opt in q.options %}
+                    <label class="quiz-option" id="option_{{ q_idx }}_{{ loop.index0 }}">
+                        <input type="radio" name="q{{ q_idx }}" value="{{ loop.index0 }}" required>
+                        <span class="option-marker">{{ ['A', 'B', 'C', 'D'][loop.index0] }}</span>
+                        <span class="option-text">{{ opt }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="text-center mt-4 mb-3">
+                <button class="btn-gradient" type="submit" style="padding: 0.8rem 3rem; font-size: 1rem;">
+                    <i class="fas fa-paper-plane"></i> Submit Quiz
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% elif show_results %}
+    <!-- Quiz Results -->
+    <div class="quiz-results-header fade-in">
+        <div class="glass-card quiz-score-card">
+            <div
+                class="quiz-score-circle {% if score >= 80 %}score-excellent{% elif score >= 60 %}score-good{% elif score >= 40 %}score-average{% else %}score-poor{% endif %}">
+                {{ score }}%
+            </div>
+            <h3>{{ selected_subject }} Quiz Result</h3>
+            <p class="result-summary">
+                You got <strong>{{ correct }}</strong> out of <strong>{{ total }}</strong> questions correct
+            </p>
+            <div class="result-tags">
+                {% if score >= 80 %}
+                <span class="score-badge score-high"><i class="fas fa-trophy"></i> Excellent!</span>
+                {% elif score >= 60 %}
+                <span class="score-badge score-high"><i class="fas fa-thumbs-up"></i> Good Job!</span>
+                {% elif score >= 40 %}
+                <span class="score-badge score-medium"><i class="fas fa-book"></i> Keep Learning</span>
+                {% else %}
+                <span class="score-badge score-low"><i class="fas fa-redo"></i> Needs Practice</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Results -->
+    <div class="mt-4">
+        {% for r in results %}
+        <div class="glass-card quiz-result-item fade-in {% if r.is_correct %}result-correct{% else %}result-wrong{% endif %}"
+            style="animation-delay: {{ loop.index * 0.08 }}s;">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="question-number">Q{{ loop.index }}</div>
+                {% if r.is_correct %}
+                <span class="score-badge score-high"><i class="fas fa-check"></i> Correct</span>
+                {% else %}
+                <span class="score-badge score-low"><i class="fas fa-times"></i> Wrong</span>
+                {% endif %}
+            </div>
+            <p class="question-text mb-3">{{ r.question }}</p>
+            <div class="result-options">
+                {% for opt in r.options %}
+                <div class="result-option
+                    {% if loop.index0 == r.correct_answer %}option-correct{% endif %}
+                    {% if loop.index0 == r.user_answer and not r.is_correct %}option-wrong{% endif %}
+                ">
+                    <span class="option-marker">{{ ['A', 'B', 'C', 'D'][loop.index0] }}</span>
+                    <span>{{ opt }}</span>
+                    {% if loop.index0 == r.correct_answer %}
+                    <i class="fas fa-check-circle ms-auto" style="color: var(--accent-green);"></i>
+                    {% elif loop.index0 == r.user_answer and not r.is_correct %}
+                    <i class="fas fa-times-circle ms-auto" style="color: #ef4444;"></i>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-4 mb-4 d-flex gap-3 justify-content-center flex-wrap">
+        <a href="/quiz?subject={{ selected_subject }}" class="btn-gradient">
+            <i class="fas fa-redo"></i> Retake {{ selected_subject }}
+        </a>
+        <a href="/quiz" class="btn-outline-glass">
+            <i class="fas fa-list"></i> Choose Another Subject
+        </a>
+    </div>
+
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -6,7 +6,7 @@
         <div>
             <h2 class="section-title">Welcome back, <span class="text-gradient">{{ session.get("user", "Student")
                     }}</span></h2>
-            <p class="section-subtitle mb-0">Your AI career dashboard — pick a module to get started</p>
+            <p class="section-subtitle mb-0">Your learning dashboard — pick a module to get started</p>
         </div>
     </div>
 
@@ -25,6 +25,11 @@
             <div class="stat-value">{{ stats.best_subject.subject[:8] if stats.best_subject else '—' }}</div>
             <div class="stat-label">Best Subject</div>
         </div>
+        <div class="glass-card stat-card">
+            <div class="stat-value">{{ stats.category_averages.get('quiz', '—') }}{% if
+                stats.category_averages.get('quiz') %}%{% endif %}</div>
+            <div class="stat-label">Quiz Avg</div>
+        </div>
     </div>
     {% endif %}
 
@@ -38,6 +43,15 @@
             <h5>Learning Analyzer</h5>
             <p>Evaluate your skills across 12+ subjects and get a personalized improvement roadmap.</p>
             <a href="/learning" class="btn-gradient"><i class="fas fa-arrow-right"></i> Open</a>
+        </div>
+
+        <div class="glass-card dash-card green">
+            <div class="dash-card-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green);">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <h5>Knowledge Quiz</h5>
+            <p>Test your knowledge with MCQ quizzes across 12 subjects. Track your scores and improvement.</p>
+            <a href="/quiz" class="btn-gradient-cool btn-gradient"><i class="fas fa-arrow-right"></i> Open</a>
         </div>
 
         <div class="glass-card dash-card cyan">

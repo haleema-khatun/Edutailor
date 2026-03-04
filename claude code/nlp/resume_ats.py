@@ -1,4 +1,8 @@
 import re
+from openai import OpenAI
+
+# Use API key
+client = OpenAI(api_key="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")
 
 REQUIRED_KEYWORDS = [
     "python", "machine learning", "data analysis",
@@ -11,7 +15,66 @@ ACTION_VERBS = [
     "built", "optimized", "analyzed", "created"
 ]
 
+
 def analyze_resume(text):
+    """Analyze resume using OpenAI for real, contextual feedback."""
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are an expert ATS (Applicant Tracking System) resume analyzer. 
+Analyze the given resume text and provide:
+
+1. ATS Score (0-100): Based on keyword optimization, formatting quality, action verbs usage, 
+   quantifiable achievements, and overall structure.
+2. Matched Keywords: List of relevant technical/professional keywords found in the resume.
+3. Missing Keywords: Important keywords that should be added for a software developer role.
+4. Improvements: 3-6 specific, actionable improvement suggestions.
+
+Respond in this exact JSON format (no markdown, just raw JSON):
+{
+    "ATS Score": 72,
+    "Matched Keywords": ["python", "sql", "project"],
+    "Missing Keywords": ["machine learning", "teamwork"],
+    "Improvements": [
+        "Add measurable achievements with specific numbers",
+        "Include more technical skills relevant to target role",
+        "Use stronger action verbs at the start of bullet points"
+    ]
+}"""
+                },
+                {
+                    "role": "user",
+                    "content": f"Analyze this resume:\n\n{text}"
+                }
+            ],
+            temperature=0.3
+        )
+
+        import json
+        result_text = response.choices[0].message.content.strip()
+        # Clean up any markdown formatting
+        if result_text.startswith("```"):
+            result_text = result_text.split("\n", 1)[1]
+            result_text = result_text.rsplit("```", 1)[0]
+        result = json.loads(result_text)
+
+        return {
+            "ATS Score": min(max(result.get("ATS Score", 50), 0), 100),
+            "Matched Keywords": result.get("Matched Keywords", []),
+            "Missing Keywords": result.get("Missing Keywords", []),
+            "Improvements": result.get("Improvements", ["Consider adding more details to your resume."])
+        }
+
+    except Exception as e:
+        # Fallback to local analysis if API fails
+        return _local_analyze_resume(text)
+
+
+def _local_analyze_resume(text):
+    """Fallback local analysis if OpenAI API is unavailable."""
     text_lower = text.lower()
 
     matched = []

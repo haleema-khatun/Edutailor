@@ -108,7 +108,7 @@ def get_progress(user_id):
     ).fetchall()
     conn.close()
 
-    progress = {"learning": [], "interview": [], "resume": []}
+    progress = {"learning": [], "interview": [], "resume": [], "quiz": []}
     for row in rows:
         r = dict(row)
         cat = r["category"]

@@ -375,6 +375,233 @@ def download():
     pdf = generate_pdf(data)
     return send_file(pdf, as_attachment=True)
 
+import random
+
+# -------------------- QUIZ QUESTION BANK (10 per subject) --------------------
+
+QUIZ_BANK = {
+    "Python": [
+        {"q": "What is the output of print(type([]))?", "options": ["<class 'list'>", "<class 'tuple'>", "<class 'dict'>", "<class 'set'>"], "answer": 0},
+        {"q": "Which keyword is used to define a function in Python?", "options": ["func", "define", "def", "function"], "answer": 2},
+        {"q": "What does 'len()' function do?", "options": ["Returns data type", "Returns length", "Returns index", "Returns value"], "answer": 1},
+        {"q": "Which of these is immutable in Python?", "options": ["List", "Dictionary", "Set", "Tuple"], "answer": 3},
+        {"q": "What is the correct file extension for Python files?", "options": [".pyth", ".pt", ".py", ".pyt"], "answer": 2},
+        {"q": "What does 'pip' stand for?", "options": ["Python Install Package", "Pip Installs Packages", "Package in Python", "Python Integrated Platform"], "answer": 1},
+        {"q": "Which method adds an element to the end of a list?", "options": ["add()", "insert()", "append()", "push()"], "answer": 2},
+        {"q": "What is a dictionary in Python?", "options": ["Ordered sequence", "Key-value pairs", "Immutable list", "Set of numbers"], "answer": 1},
+        {"q": "How do you start a comment in Python?", "options": ["//", "/*", "#", "--"], "answer": 2},
+        {"q": "What is the output of bool('')?", "options": ["True", "False", "None", "Error"], "answer": 1},
+    ],
+    "Java": [
+        {"q": "Which method is the entry point of a Java program?", "options": ["start()", "main()", "run()", "init()"], "answer": 1},
+        {"q": "Java is a ___-oriented programming language.", "options": ["Procedure", "Object", "Function", "Logic"], "answer": 1},
+        {"q": "Which keyword is used to inherit a class in Java?", "options": ["implements", "extends", "inherits", "super"], "answer": 1},
+        {"q": "What is the size of int in Java?", "options": ["2 bytes", "4 bytes", "8 bytes", "Depends on OS"], "answer": 1},
+        {"q": "Which of these is not a Java feature?", "options": ["Object-oriented", "Portable", "Pointers", "Multithreaded"], "answer": 2},
+        {"q": "What is JVM?", "options": ["Java Virtual Machine", "Java Version Manager", "Java Variable Method", "Java Verified Module"], "answer": 0},
+        {"q": "Which collection allows duplicate elements?", "options": ["Set", "HashSet", "ArrayList", "TreeSet"], "answer": 2},
+        {"q": "What is encapsulation?", "options": ["Hiding data within a class", "Inheriting properties", "Method overloading", "Creating objects"], "answer": 0},
+        {"q": "Which keyword prevents a class from being inherited?", "options": ["static", "final", "abstract", "private"], "answer": 1},
+        {"q": "What is the parent class of all Java classes?", "options": ["Main", "Object", "Class", "Super"], "answer": 1},
+    ],
+    "JavaScript": [
+        {"q": "Which company developed JavaScript?", "options": ["Microsoft", "Netscape", "Google", "Apple"], "answer": 1},
+        {"q": "What does 'typeof null' return in JavaScript?", "options": ["'null'", "'undefined'", "'object'", "'boolean'"], "answer": 2},
+        {"q": "Which method converts JSON to a JavaScript object?", "options": ["JSON.stringify()", "JSON.parse()", "JSON.convert()", "JSON.toObject()"], "answer": 1},
+        {"q": "What is '===' in JavaScript?", "options": ["Assignment", "Loose equality", "Strict equality", "Not equal"], "answer": 2},
+        {"q": "Which keyword declares a block-scoped variable?", "options": ["var", "let", "both var and let", "none"], "answer": 1},
+        {"q": "What is a closure in JavaScript?", "options": ["A loop structure", "A function with access to outer scope", "An error handler", "A class definition"], "answer": 1},
+        {"q": "Which method removes the last element of an array?", "options": ["shift()", "pop()", "splice()", "delete()"], "answer": 1},
+        {"q": "What is 'NaN' in JavaScript?", "options": ["Not a Number", "Null and None", "New Array Number", "No assigned Name"], "answer": 0},
+        {"q": "What does 'async' keyword do?", "options": ["Makes function synchronous", "Makes function return a Promise", "Stops execution", "Creates a thread"], "answer": 1},
+        {"q": "Which event fires when DOM is fully loaded?", "options": ["onload", "DOMContentLoaded", "ready", "onstart"], "answer": 1},
+    ],
+    "C++": [
+        {"q": "Who developed C++?", "options": ["Dennis Ritchie", "Bjarne Stroustrup", "James Gosling", "Guido van Rossum"], "answer": 1},
+        {"q": "Which symbol is used for single-line comments in C++?", "options": ["/* */", "//", "#", "--"], "answer": 1},
+        {"q": "What is the correct syntax to output text in C++?", "options": ["print()", "console.log()", "cout <<", "System.out.println()"], "answer": 2},
+        {"q": "Which of these is used for dynamic memory allocation in C++?", "options": ["malloc", "new", "alloc", "create"], "answer": 1},
+        {"q": "C++ supports which programming paradigm?", "options": ["Only procedural", "Only OOP", "Multi-paradigm", "Only functional"], "answer": 2},
+        {"q": "What is a virtual function?", "options": ["A function with no body", "A function that can be overridden", "A static function", "A private function"], "answer": 1},
+        {"q": "What does STL stand for?", "options": ["Standard Template Library", "System Type Library", "Static Template Loader", "Structured Type Language"], "answer": 0},
+        {"q": "Which operator is used for scope resolution?", "options": [".", "->", "::", ":"], "answer": 2},
+        {"q": "What is a destructor?", "options": ["Creates an object", "Destroys an object", "Copies an object", "Moves an object"], "answer": 1},
+        {"q": "What is polymorphism?", "options": ["Single form", "Many forms", "No form", "Static form"], "answer": 1},
+    ],
+    "Machine Learning": [
+        {"q": "Which type of learning uses labeled data?", "options": ["Unsupervised", "Supervised", "Reinforcement", "Semi-supervised"], "answer": 1},
+        {"q": "What does 'overfitting' mean?", "options": ["Model is too simple", "Model memorizes training data", "Model ignores data", "Model is perfect"], "answer": 1},
+        {"q": "Which algorithm is used for classification?", "options": ["Linear Regression", "K-Means", "Decision Tree", "PCA"], "answer": 2},
+        {"q": "What is a 'feature' in machine learning?", "options": ["Output variable", "Input variable", "Algorithm name", "Loss function"], "answer": 1},
+        {"q": "Which metric is used for regression problems?", "options": ["Accuracy", "F1-Score", "Mean Squared Error", "Precision"], "answer": 2},
+        {"q": "What is cross-validation?", "options": ["Training once", "Splitting data for train/test multiple times", "Increasing epochs", "Removing features"], "answer": 1},
+        {"q": "What is the bias-variance tradeoff?", "options": ["Speed vs accuracy", "Underfitting vs overfitting balance", "Training vs test split", "CPU vs GPU usage"], "answer": 1},
+        {"q": "Which is an ensemble method?", "options": ["Linear Regression", "Random Forest", "K-Nearest Neighbors", "Naive Bayes"], "answer": 1},
+        {"q": "What is gradient descent?", "options": ["A data structure", "An optimization algorithm", "A loss function", "A regularization technique"], "answer": 1},
+        {"q": "What does 'regularization' prevent?", "options": ["Underfitting", "Overfitting", "Data loss", "Slow training"], "answer": 1},
+    ],
+    "Deep Learning": [
+        {"q": "What is the basic unit of a neural network?", "options": ["Layer", "Neuron", "Weight", "Bias"], "answer": 1},
+        {"q": "Which activation function outputs values between 0 and 1?", "options": ["ReLU", "Tanh", "Sigmoid", "Softmax"], "answer": 2},
+        {"q": "CNN stands for?", "options": ["Central Neural Network", "Convolutional Neural Network", "Connected Node Network", "Computed Neural Net"], "answer": 1},
+        {"q": "Which framework was developed by Google for deep learning?", "options": ["PyTorch", "Keras", "TensorFlow", "Caffe"], "answer": 2},
+        {"q": "What is 'backpropagation' used for?", "options": ["Data preprocessing", "Updating weights", "Feature extraction", "Data augmentation"], "answer": 1},
+        {"q": "What is a 'dropout' layer?", "options": ["Adds neurons", "Randomly disables neurons during training", "Increases learning rate", "Normalizes data"], "answer": 1},
+        {"q": "RNN stands for?", "options": ["Random Neural Network", "Recurrent Neural Network", "Recursive Node Network", "Reduced Neural Net"], "answer": 1},
+        {"q": "What is transfer learning?", "options": ["Training from scratch", "Using pre-trained model for new task", "Moving data between servers", "Converting models"], "answer": 1},
+        {"q": "What is an epoch?", "options": ["One batch of data", "One pass through entire dataset", "One neuron update", "One layer forward"], "answer": 1},
+        {"q": "What is vanishing gradient problem?", "options": ["Gradients become too large", "Gradients become too small", "Gradients become zero", "Gradients oscillate"], "answer": 1},
+    ],
+    "NLP": [
+        {"q": "NLP stands for?", "options": ["Neural Language Processing", "Natural Language Processing", "Network Language Protocol", "Natural Logic Programming"], "answer": 1},
+        {"q": "What is 'tokenization' in NLP?", "options": ["Removing stop words", "Splitting text into tokens", "Stemming words", "Encoding text"], "answer": 1},
+        {"q": "Which model introduced the 'Attention' mechanism?", "options": ["LSTM", "GRU", "Transformer", "RNN"], "answer": 2},
+        {"q": "What is 'stemming'?", "options": ["Adding prefixes", "Reducing words to root form", "Translating text", "Parsing sentences"], "answer": 1},
+        {"q": "BERT was developed by?", "options": ["Facebook", "OpenAI", "Google", "Microsoft"], "answer": 2},
+        {"q": "What is TF-IDF?", "options": ["A neural network", "A term frequency measure", "A language model", "A tokenizer"], "answer": 1},
+        {"q": "What is Named Entity Recognition?", "options": ["Finding sentiments", "Identifying entities like names and places", "Translating text", "Summarizing text"], "answer": 1},
+        {"q": "What is Word2Vec?", "options": ["A tokenizer", "Word embedding technique", "Language model", "Text classifier"], "answer": 1},
+        {"q": "What is sentiment analysis?", "options": ["Grammar checking", "Determining emotion/opinion in text", "Word counting", "Language detection"], "answer": 1},
+        {"q": "GPT stands for?", "options": ["General Processing Tool", "Generative Pre-trained Transformer", "Global Pattern Tracker", "Gradient Path Technique"], "answer": 1},
+    ],
+    "DSA": [
+        {"q": "What is the time complexity of binary search?", "options": ["O(n)", "O(log n)", "O(n\u00b2)", "O(1)"], "answer": 1},
+        {"q": "Which data structure uses FIFO?", "options": ["Stack", "Queue", "Tree", "Graph"], "answer": 1},
+        {"q": "What is the worst-case time complexity of quicksort?", "options": ["O(n log n)", "O(n\u00b2)", "O(n)", "O(log n)"], "answer": 1},
+        {"q": "Which data structure is used for BFS?", "options": ["Stack", "Queue", "Heap", "Array"], "answer": 1},
+        {"q": "A balanced BST has height of?", "options": ["O(n)", "O(log n)", "O(n\u00b2)", "O(1)"], "answer": 1},
+        {"q": "What is a hash table's average lookup time?", "options": ["O(n)", "O(log n)", "O(1)", "O(n\u00b2)"], "answer": 2},
+        {"q": "Which sorting algorithm is stable?", "options": ["Quick Sort", "Heap Sort", "Merge Sort", "Selection Sort"], "answer": 2},
+        {"q": "What is dynamic programming?", "options": ["Random approach", "Breaking problem into overlapping subproblems", "Brute force", "Greedy approach"], "answer": 1},
+        {"q": "Which data structure uses LIFO?", "options": ["Queue", "Stack", "Array", "Linked List"], "answer": 1},
+        {"q": "What is the space complexity of merge sort?", "options": ["O(1)", "O(log n)", "O(n)", "O(n\u00b2)"], "answer": 2},
+    ],
+    "DBMS": [
+        {"q": "SQL stands for?", "options": ["Structured Query Language", "Simple Query Language", "Standard Query Logic", "Sequential Query Language"], "answer": 0},
+        {"q": "Which normal form removes partial dependencies?", "options": ["1NF", "2NF", "3NF", "BCNF"], "answer": 1},
+        {"q": "What does ACID stand for in databases?", "options": ["Atomicity, Consistency, Isolation, Durability", "Access, Control, Integrity, Data", "Atomicity, Control, Isolation, Data", "Access, Consistency, Integrity, Durability"], "answer": 0},
+        {"q": "Which command is used to retrieve data from a database?", "options": ["GET", "FETCH", "SELECT", "RETRIEVE"], "answer": 2},
+        {"q": "A primary key must be?", "options": ["Null", "Duplicate", "Unique and not null", "Only numeric"], "answer": 2},
+        {"q": "What is a foreign key?", "options": ["Unique identifier", "References primary key of another table", "Auto-increment field", "Index column"], "answer": 1},
+        {"q": "What is a JOIN in SQL?", "options": ["Deletes tables", "Combines rows from multiple tables", "Creates a table", "Drops a column"], "answer": 1},
+        {"q": "What is normalization?", "options": ["Adding redundancy", "Reducing data redundancy", "Encrypting data", "Backing up data"], "answer": 1},
+        {"q": "Which SQL clause filters grouped results?", "options": ["WHERE", "HAVING", "GROUP BY", "ORDER BY"], "answer": 1},
+        {"q": "What is an index in a database?", "options": ["A table type", "Speeds up data retrieval", "A constraint", "A relationship"], "answer": 1},
+    ],
+    "Operating Systems": [
+        {"q": "Which scheduling algorithm is non-preemptive?", "options": ["Round Robin", "FCFS", "SRTF", "Priority (preemptive)"], "answer": 1},
+        {"q": "What is a 'deadlock'?", "options": ["Fast execution", "Processes waiting for each other indefinitely", "Memory overflow", "CPU idle state"], "answer": 1},
+        {"q": "What does 'virtual memory' do?", "options": ["Increases RAM physically", "Extends memory using disk", "Compresses files", "Speeds up CPU"], "answer": 1},
+        {"q": "Which memory allocation strategy is 'best fit'?", "options": ["Allocates first available block", "Allocates smallest sufficient block", "Allocates largest block", "Random allocation"], "answer": 1},
+        {"q": "What is a 'semaphore' used for?", "options": ["Memory management", "Process synchronization", "File management", "Disk scheduling"], "answer": 1},
+        {"q": "What is paging?", "options": ["Memory management technique", "CPU scheduling", "Disk formatting", "Process creation"], "answer": 0},
+        {"q": "What is a thread?", "options": ["A heavy process", "Lightweight process", "A file system", "A network protocol"], "answer": 1},
+        {"q": "What is thrashing?", "options": ["Fast processing", "Excessive paging reducing performance", "Memory leak", "CPU overclocking"], "answer": 1},
+        {"q": "What are the conditions for deadlock?", "options": ["Mutual exclusion only", "Mutual exclusion, hold and wait, no preemption, circular wait", "Only circular wait", "Only no preemption"], "answer": 1},
+        {"q": "What is a context switch?", "options": ["Changing user", "Saving/restoring process state", "Installing OS", "Formatting disk"], "answer": 1},
+    ],
+    "Web Development": [
+        {"q": "HTML stands for?", "options": ["Hyper Text Markup Language", "High Tech Modern Language", "Hyper Transfer Markup Language", "Home Tool Markup Language"], "answer": 0},
+        {"q": "Which CSS property changes text color?", "options": ["font-color", "text-color", "color", "foreground"], "answer": 2},
+        {"q": "What does API stand for?", "options": ["Application Programming Interface", "Applied Program Integration", "Application Process Interface", "Automated Programming Interface"], "answer": 0},
+        {"q": "Which HTTP method is used to update a resource?", "options": ["GET", "POST", "PUT", "DELETE"], "answer": 2},
+        {"q": "What is responsive design?", "options": ["Fast loading", "Adapting to screen sizes", "Using animations", "Server-side rendering"], "answer": 1},
+        {"q": "What is the DOM?", "options": ["Database Object Model", "Document Object Model", "Digital Output Module", "Data Operation Manager"], "answer": 1},
+        {"q": "What is CORS?", "options": ["Code Optimization Resource System", "Cross-Origin Resource Sharing", "Central Object Request Service", "Client-Oriented Response System"], "answer": 1},
+        {"q": "What is a REST API?", "options": ["A database", "An architectural style for web services", "A frontend framework", "A testing tool"], "answer": 1},
+        {"q": "What does CSS Box Model include?", "options": ["Only padding", "Content, padding, border, margin", "Only margin", "Only border"], "answer": 1},
+        {"q": "What is a cookie in web development?", "options": ["A virus", "Small data stored in browser", "A server type", "A CSS property"], "answer": 1},
+    ],
+    "Git & DevOps": [
+        {"q": "What command initializes a Git repository?", "options": ["git start", "git init", "git create", "git new"], "answer": 1},
+        {"q": "What does 'git clone' do?", "options": ["Deletes a repo", "Creates a copy of a repo", "Merges branches", "Pushes changes"], "answer": 1},
+        {"q": "Docker containers are based on?", "options": ["Virtual machines", "Images", "Snapshots", "Volumes"], "answer": 1},
+        {"q": "What is CI/CD?", "options": ["Code Integration/Code Deployment", "Continuous Integration/Continuous Delivery", "Central Integration/Central Delivery", "Compiled Integration/Compiled Deployment"], "answer": 1},
+        {"q": "Which command shows the commit history?", "options": ["git status", "git log", "git diff", "git show"], "answer": 1},
+        {"q": "What does 'git merge' do?", "options": ["Deletes a branch", "Combines two branches", "Creates a branch", "Reverts changes"], "answer": 1},
+        {"q": "What is a Dockerfile?", "options": ["A log file", "Instructions to build a Docker image", "A config for Git", "A database file"], "answer": 1},
+        {"q": "What is Kubernetes used for?", "options": ["Version control", "Container orchestration", "Code compilation", "Database management"], "answer": 1},
+        {"q": "What does 'git stash' do?", "options": ["Deletes changes", "Temporarily saves uncommitted changes", "Pushes to remote", "Creates a tag"], "answer": 1},
+        {"q": "What is a Git branch?", "options": ["A copy of the server", "An independent line of development", "A backup file", "A commit message"], "answer": 1},
+    ],
+}
+
+# -------------------- QUIZ --------------------
+
+@app.route("/quiz", methods=["GET", "POST"])
+@login_required
+def quiz():
+    if request.method == "POST":
+        subject = request.form.get("subject", "")
+        if subject not in QUIZ_BANK:
+            flash("Invalid subject selected.", "error")
+            return redirect(url_for("quiz"))
+
+        questions = QUIZ_BANK[subject]
+        correct = 0
+        total = len(questions)
+        results = []
+
+        for i, q in enumerate(questions):
+            user_ans = request.form.get(f"q{i}", "-1")
+            try:
+                user_ans = int(user_ans)
+            except ValueError:
+                user_ans = -1
+
+            is_correct = user_ans == q["answer"]
+            if is_correct:
+                correct += 1
+
+            results.append({
+                "question": q["q"],
+                "options": q["options"],
+                "user_answer": user_ans,
+                "correct_answer": q["answer"],
+                "is_correct": is_correct,
+            })
+
+        score = round((correct / total) * 100)
+
+        # Save quiz score to DB
+        user_id = session.get("user_id")
+        if user_id:
+            save_progress(user_id, "quiz", subject, score)
+
+        return render_template(
+            "quiz.html",
+            subjects=ALL_SUBJECTS,
+            selected_subject=subject,
+            questions=None,
+            results=results,
+            score=score,
+            correct=correct,
+            total=total,
+            show_results=True,
+        )
+
+    # GET — check if subject param provided
+    subject = request.args.get("subject", "")
+
+    if subject and subject in QUIZ_BANK:
+        questions = QUIZ_BANK[subject]
+        return render_template(
+            "quiz.html",
+            subjects=ALL_SUBJECTS,
+            selected_subject=subject,
+            questions=questions,
+            results=None,
+            show_results=False,
+        )
+
+    return render_template(
+        "quiz.html",
+        subjects=ALL_SUBJECTS,
+        selected_subject=None,
+        questions=None,
+        results=None,
+        show_results=False,
+    )
 
 
 # -------------------- RUN APP --------------------
