@@ -15,5 +15,5 @@ PyPDF2
 python-docx
 joblib
 werkzeug
-uvicorn
-fastapi
+flask
+gunicorn
