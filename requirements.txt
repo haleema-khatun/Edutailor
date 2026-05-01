@@ -1,0 +1,17 @@
+flask
+numpy
+pandas
+scikit-learn
+textblob
+nltk
+speechrecognition
+openai
+textblob
+reportlab
+SpeechRecognition
+pyttsx3
+pyaudio
+PyPDF2
+python-docx
+joblib
+werkzeug
