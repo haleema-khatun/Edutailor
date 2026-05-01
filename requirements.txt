@@ -10,7 +10,7 @@ textblob
 reportlab
 SpeechRecognition
 pyttsx3
-pyaudio
+pydub
 PyPDF2
 python-docx
 joblib
